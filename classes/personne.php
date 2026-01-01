@@ -1,9 +1,9 @@
 <?php
 abstract class Personne{
     protected int $id;
-    protected string $nom;
-    protected string $email;
-    protected string $nationalite;
+    protected ?string $nom=null;
+    protected ?string $email=null;
+    protected ?string $nationalite=null;
 
     public function __construct(string $nom,string $email,string $nationalite){
         $this->nom=$nom;

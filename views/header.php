@@ -31,11 +31,6 @@ $role = $_SESSION['role'] ?? 'visitor';
         <div class="collapse navbar-collapse" id="navMenu">
             <ul class="navbar-nav ms-auto">
 
-                <!-- COMMUN -->
-                <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-people"></i> Marché</a>
-                </li>
-
                 <!-- ADMIN -->
                 <?php if ($role === 'admin'): ?>
                     <li class="nav-item">
@@ -54,6 +49,11 @@ $role = $_SESSION['role'] ?? 'visitor';
                         </a>
                     </li>
                 <?php endif; ?>
+                <!-- COMMUN -->
+                <li class="nav-item">
+                    <a class="nav-link" href="membres.php"><i class="bi bi-people"></i> Marché</a>
+                </li>
+
 
                 <!-- JOURNALISTE -->
                 <?php if ($role === 'journalist'): ?>
