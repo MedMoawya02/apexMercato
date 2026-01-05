@@ -44,7 +44,7 @@ $role = $_SESSION['role'] ?? 'visitor';
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin/teams.php">
+                        <a class="nav-link" href="teamCreate.php">
                             <i class="bi bi-building"></i> Équipes
                         </a>
                     </li>
