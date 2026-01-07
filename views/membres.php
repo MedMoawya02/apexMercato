@@ -7,7 +7,6 @@ require_once '../classes/contrat.php';
 include 'header.php';
 $j = new Joueur("m", "m", "m", "m", "m", 111.00, 111.11);
 $contrat = new Contrat();
-
 if (!isset($_GET['search'])) {
     $rows = $j->getJoueurs();
     $teams = new Team();
@@ -65,7 +64,7 @@ if (!isset($_GET['search'])) {
                 </h5>
             </div>
             <div class="card-body">
-                <table id="membersTable" class="table table-striped table-hover">
+                <table id="membersTable" class="table table-striped table-hover text-center">
                     <thead class="table-dark text-center">
                         <tr>
                             <th>ID</th>
@@ -82,6 +81,18 @@ if (!isset($_GET['search'])) {
                     <tbody>
                         <?php if (!empty($rows)): ?>
                             <?php foreach ($rows as $row): ?>
+
+                                <?php
+                                $equipeActuelle = null;
+
+                                if ($contrat->havingContrat($row['id'], $row['type'])) {
+                                    $equipeActuelle = $contrat->getEquipeActuelle(
+                                        $row['id'],
+                                        $row['type']
+                                    );
+                                }
+                                ?>
+
                                 <tr data-type="<?= $row['type'] ?>">
                                     <td><?= $row['id'] ?></td>
                                     <td><?= htmlspecialchars($row['nom']) ?></td>
@@ -109,9 +120,16 @@ if (!isset($_GET['search'])) {
                                     <?php else: ?>
                                         <td>
                                             <span class="text-muted">Contrat actif</span>
+                                            <button class="btn btn-warning btn-sm ms-1" data-bs-toggle="modal"
+                                                data-bs-target="#transfertModal" data-id="<?= $row['id'] ?>"
+                                                data-type="<?= $row['type'] ?>" data-nom="<?= htmlspecialchars($row['nom']) ?>"
+                                                data-equipe="<?= htmlspecialchars($equipeActuelle['nomEquipe'] ?? '-') ?>"
+                                                data-equipe-id="<?= $equipeActuelle['id'] ?>">
+                                                <i class="bi bi-arrow-left-right"></i> Transfert
+                                            </button>
                                         </td>
                                     <?php endif; ?>
-                                   
+
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -194,6 +212,90 @@ if (!isset($_GET['search'])) {
                 </div>
                 <!-- Modal end -->
 
+                <!-- Modal Transfert start -->
+                <div class="modal fade" id="transfertModal" tabindex="-1" aria-labelledby="transfertModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="../actions/createTransfert.php" method="POST">
+                                <div class="modal-header bg-warning text-white">
+                                    <h5 class="modal-title" id="transfertModalLabel"><i
+                                            class="bi bi-arrow-left-right"></i> Effectuer Transfert</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+
+                                <div class="modal-body">
+                                    <!-- ID,type et id de l'equipede depart cachés -->
+                                    <input type="hidden" name="idPersonne" id="transfertId">
+                                    <input type="hidden" name="type" id="transfertType">
+                                    <input type="hidden" name="idEquipeDepart" id="transfertEquipeId">
+
+                                    <!-- Nom membre (readonly) -->
+                                    <div class="mb-3">
+
+                                        <label class="form-label">Nom</label>
+                                        <input type="text" id="transfertNom" class="form-control" readonly>
+                                    </div>
+
+                                    <!-- Équipe actuelle -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Équipe actuelle</label>
+                                        <input type="text" id="transfertEquipe" class="form-control" readonly>
+
+
+                                    </div>
+
+                                    <!-- Nouvelle équipe -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Nouvelle équipe</label>
+                                        <select name="idEquipeArrivee" class="form-select" required>
+                                            <option value="">Sélectionner une équipe</option>
+                                            <?php foreach ($teams as $team): ?>
+                                                <option value="<?= $team['id'] ?>"><?= htmlspecialchars($team['nom']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <!-- Salaire -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Salaire (€)</label>
+                                        <input type="number" name="salaire" class="form-control" required>
+                                    </div>
+                                    <!-- Montant transfert -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Montant (€)</label>
+                                        <input type="number" name="montant" class="form-control" step="0.01" min="0"
+                                            required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Statut du transfert</label>
+                                        <select name="statut" class="form-select" required>
+                                            <option value="">Choisir un statut</option>
+                                            <option value="en_attente">En attente</option>
+                                            <option value="valide">Validé</option>
+                                            <option value="annule">Annulé</option>
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Annuler
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        Transférer
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Transfert end -->
+
             </div>
         </div>
     </div>
@@ -228,6 +330,19 @@ if (!isset($_GET['search'])) {
             document.getElementById('modalType').value = type;
             document.getElementById('modalNom').value = nom;
         });
+
+        //modal transfert
+        const transfertModal = document.getElementById('transfertModal');
+        transfertModal.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget;
+
+            document.getElementById('transfertId').value = button.getAttribute('data-id');
+            document.getElementById('transfertType').value = button.getAttribute('data-type');
+            document.getElementById('transfertNom').value = button.getAttribute('data-nom');
+            document.getElementById('transfertEquipe').value = button.getAttribute('data-equipe');
+            document.getElementById('transfertEquipeId').value = button.getAttribute('data-equipe-id');
+        });
+
     </script>
 </body>
 

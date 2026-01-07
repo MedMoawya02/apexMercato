@@ -1,5 +1,6 @@
 <?php
 require_once "../db_connect.php";
+require_once "financialEngine.php";
 class Contrat{
     private $db;
     private readonly ?DateTime $startdate;
@@ -19,15 +20,16 @@ class Contrat{
     }
 
     //create contrat
-    public function createContrat($startDate,$salaire,$endDate,$idJoueur,$idCoach){
+    public function createContrat($startDate,$salaire,$endDate,$idEquipe,$idJoueur,$idCoach){
         $this->db = new Database("localhost", "apexmercato", "root", "");
         $conn = $this->db->getConnection();
-        $sql="INSERT INTO contrat (startDate,salaire,dateFin,idJoueur,idCoach)VALUES (:startDate,:salaire,:dateFin,:idJoueur,:idCoach)";
+        $sql="INSERT INTO contrat (startDate,salaire,dateFin,idEquipe,idJoueur,idCoach)VALUES (:startDate,:salaire,:dateFin,:idEquipe,:idJoueur,:idCoach)";
         $stmt=$conn->prepare($sql);
         $stmt->execute([
             ':startDate'=>$startDate,
-            ':salaire'=>$salaire,
+            ':salaire'=>FinancialEngine::calculTax($salaire),
             ':dateFin'=>$endDate,
+            ':idEquipe'=>$idEquipe,
             ':idJoueur'=>$idJoueur,
             ':idCoach'=>$idCoach,
         ]);
@@ -49,4 +51,29 @@ class Contrat{
         ]);
         return $stmt->fetchColumn()>0;
     }
+
+    //obtenir le nom
+    public function getEquipeActuelle($id,$type){
+        $this->db = new Database("localhost", "apexmercato", "root", "");
+        $conn = $this->db->getConnection();
+        if($type=="Joueur"){
+            $sql="SELECT equipe.id,equipe.nom AS nomEquipe FROM contrat
+                INNER JOIN equipe ON contrat.idEquipe=equipe.id
+                WHERE contrat.idJoueur = :id AND contrat.dateFin >= CURDATE()
+                ORDER BY contrat.startDate DESC LIMIT 1
+            ";
+            $stmt=$conn->prepare($sql);
+        }else{
+           $sql="SELECT equipe.id,equipe.nom AS nomEquipe FROM contrat
+                INNER JOIN equipe ON contrat.idEquipe=equipe.id
+                WHERE contrat.idCoach = :id AND contrat.dateFin >= CURDATE()
+                ORDER BY contrat.startDate DESC LIMIT 1
+            "; 
+            $stmt=$conn->prepare($sql);
+        }
+        $stmt->execute([':id'=>$id]);
+        $row=$stmt->fetch(PDO::FETCH_ASSOC);
+       /*  return $row['nomEquipe']; */
+       return $row;
+    } 
 }

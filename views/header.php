@@ -78,7 +78,7 @@ $role = $_SESSION['role'] ?? 'visitor';
                     </li>
                 <?php else: ?>
                     <li class="nav-item">
-                        <a class="nav-link text-danger" href="#">
+                        <a class="nav-link text-danger" href="../actions/logout.php">
                             <i class="bi bi-box-arrow-right"></i> Déconnexion
                         </a>
                     </li>

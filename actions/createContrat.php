@@ -6,12 +6,13 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
     $endDate=$_POST['endDate'];
     $type=$_POST['type'];
     $salaire=$_POST['salaire'];
+    $equipe=$_POST['idEquipe'];
     $contrat=new Contrat();
    
     if($type=="Joueur"){
-        $contrat->createContrat($startDate,$salaire,$endDate,$id,null);
+        $contrat->createContrat($startDate,$salaire,$endDate,$equipe,$id,null);
     }elseif($type=="Coach"){
-        $contrat->createContrat($startDate,$salaire,$endDate,null,$id);
+        $contrat->createContrat($startDate,$salaire,$endDate,$equipe,null,$id);
     }
     header("location:../views/membres.php");
     exit;
