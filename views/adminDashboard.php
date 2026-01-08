@@ -1,5 +1,8 @@
 <?php
+require_once "../classes/joueur.php";
+require_once "../classes/team.php";
 require_once "../classes/transfert.php";
+require_once "../classes/Formater.php";
 include 'header.php';
 if ($_SESSION['role'] !== 'admin') {
     header('Location:views/login.php');
@@ -7,6 +10,11 @@ if ($_SESSION['role'] !== 'admin') {
 }
 $transfert = new Transfert();
 $transferts = $transfert->allTransferts();
+$nbrTransfert=$transfert->nbrTransfertFinis();
+$joueur=new Joueur();
+$joueursActifs=$joueur->joueursActifs();
+$team=new Team();
+$nbrEquipes=$team->nbrEquipes();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -72,7 +80,7 @@ $transferts = $transfert->allTransferts();
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="stat-label">Joueurs Actifs</div>
-                                <div class="display-6 fw-bold">48</div>
+                                <div class="display-6 fw-bold"><?=$joueursActifs ?? 0?></div>
                             </div>
                             <div class="icon-shape">
                                 <i class="bi bi-person-badge"></i>
@@ -88,7 +96,7 @@ $transferts = $transfert->allTransferts();
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="stat-label">Total Équipes</div>
-                                <div class="display-6 fw-bold">12</div>
+                                <div class="display-6 fw-bold"><?= $nbrEquipes ?? 0 ?></div>
                             </div>
                             <div class="icon-shape">
                                 <i class="bi bi-shield-shaded"></i>
@@ -120,7 +128,7 @@ $transferts = $transfert->allTransferts();
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="stat-label">Transferts Finis</div>
-                                <div class="display-6 fw-bold">09</div>
+                                <div class="display-6 fw-bold"><?=$nbrTransfert ?? 0 ?></div>
                             </div>
                             <div class="icon-shape">
                                 <i class="bi bi-arrow-left-right"></i>
@@ -206,7 +214,7 @@ $transferts = $transfert->allTransferts();
                                                 <td><?= htmlspecialchars($t['equipeArrive']) ?></td>
 
                                                 <!-- Montant -->
-                                                <td class="fw-bold">€<?= number_format($t['montant'], 0, ',', ' ') ?></td>
+                                                <td class="fw-bold">€<?= /* number_format($t['montant'], 0, ',', ' ') */Formater::currency($t['montant']) ?></td>
 
                                                 <!-- Statut -->
                                                 <td>

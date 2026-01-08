@@ -76,4 +76,18 @@ class Contrat{
        /*  return $row['nomEquipe']; */
        return $row;
     } 
+
+    //un tableau contient le nom,salaire et type utilisant Union
+    public function getData(){
+        $this->db = new Database("localhost", "apexmercato", "root", "");
+        $conn = $this->db->getConnection();
+        $sql="SELECT salaire,joueur.nom AS nomJoueur,'Joueur' AS type FROM contrat 
+                INNER JOIN joueur ON contrat.idJoueur=joueur.id
+                UNION
+                SELECT salaire,coach.nom AS nomCoach,'Coach' AS type FROM contrat 
+                INNER JOIN coach ON contrat.idCoach=coach.id";
+        $stmt=$conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

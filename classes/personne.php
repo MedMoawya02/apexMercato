@@ -5,7 +5,7 @@ abstract class Personne{
     protected ?string $email=null;
     protected ?string $nationalite=null;
 
-    public function __construct(string $nom,string $email,string $nationalite){
+    public function __construct(?string $nom=null,?string $email=null,?string $nationalite=null){
         $this->nom=$nom;
         $this->email=$email;
         $this->nationalite=$nationalite;

@@ -48,22 +48,22 @@ $role = $_SESSION['role'] ?? 'visitor';
                             <i class="bi bi-building"></i> Équipes
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="membres.php"><i class="bi bi-people"></i> Marché</a>
+                    </li>
                 <?php endif; ?>
                 <!-- COMMUN -->
-                <li class="nav-item">
-                    <a class="nav-link" href="membres.php"><i class="bi bi-people"></i> Marché</a>
-                </li>
 
 
                 <!-- JOURNALISTE -->
-                <?php if ($role === 'journalist'): ?>
+                <?php if ($role === 'journaliste'): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="/journalist/dashboard.php">
+                        <a class="nav-link" href="../views/journalisteDashboard.php">
                             <i class="bi bi-bar-chart"></i> Analyses
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/journalist/news.php">
+                        <a class="nav-link" href="../views/journalisteNews.php">
                             <i class="bi bi-newspaper"></i> News privées
                         </a>
                     </li>

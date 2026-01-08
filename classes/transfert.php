@@ -45,10 +45,10 @@ class Transfert{
             
             //la fermuture d'ancien contrat
             if($type=="Joueur"){
-                $sql="UPDATE contrat SET dateFin=CURDATE() WHERE idJoueur=:idMembre ";
+                $sql="UPDATE contrat SET dateFin=CURDATE() WHERE idJoueur=:idMembre AND dateFin > CURDATE() ";
                 $stmt=$conn->prepare($sql);
             }else{
-                $sql="UPDATE contrat SET dateFin=CURDATE() WHERE idCoach=:idMembre ";
+                $sql="UPDATE contrat SET dateFin=CURDATE() WHERE idCoach=:idMembre AND dateFin > CURDATE()";
                 $stmt=$conn->prepare($sql);
             }
             $stmt->execute([':idMembre'=>$idMembre]);
@@ -93,10 +93,19 @@ class Transfert{
             ON transfert.idPersonne = coach.id  
             AND transfert.typePersonne = 'Coach'
          LEFT JOIN equipe AS eqD ON transfert.idEquipeDepart=eqD.id
-         LEFT JOIN equipe AS eqA ON transfert.idEquipeDepart=eqA.id;";
+         LEFT JOIN equipe AS eqA ON transfert.idEquipeArrivé=eqA.id;";
         $stmt=$conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchall(PDO::FETCH_ASSOC);
+    }
+    //get nbr transfert valide
+    public function nbrTransfertFinis(){
+          $this->db = new Database("localhost", "apexmercato", "root", "");
+        $conn = $this->db->getConnection();
+        $sql="SELECT COUNT(*) FROM `transfert` WHERE statut='Validè'";
+        $stmt=$conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchColumn();
     }
 
 }

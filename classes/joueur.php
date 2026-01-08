@@ -9,7 +9,7 @@ class Joueur extends Personne
     private ?float $valeurMarchande = null;
     private ?float $salaireMensuel = null;
 
-    public function __construct(string $nom, string $email, string $nationalite, string $role, string $pseudo, float $valeurMarchande, float $salaireMensuel)
+    public function __construct(?string $nom=null,?string $email=null,?string $nationalite=null, ?string $role=null,?string $pseudo=null, ?float $valeurMarchande=null, ?float $salaireMensuel=null)
     {
         parent::__construct($nom, $email, $nationalite);
         $this->role = $role;
@@ -61,7 +61,16 @@ class Joueur extends Personne
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $rows;
     }
-
+    //get joueurs avaient un contrat
+    public function joueursActifs(){
+        $this->db = new Database("localhost", "apexmercato", "root", "");
+        $conn = $this->db->getConnection();
+        $sql="SELECT count(*) FROM contrat 
+INNER JOIN joueur ON contrat.idJoueur=joueur.id AND dateFin>CURRENT_DATE()";
+        $stmt=$conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
     //Search
     public function searchMembre(string $nom)
     {

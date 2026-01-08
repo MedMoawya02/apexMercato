@@ -59,4 +59,14 @@ class Team{
          ]);
     }
 
+    //get number of teams
+    public function nbrEquipes(){
+         $this->db=new Database("localhost", "apexmercato", "root", "");
+          $conn=$this->db->getConnection();
+          $sql="SELECT count(*) FROM equipe";
+          $stmt=$conn->prepare($sql);
+          $stmt->execute();
+          return $stmt->fetchColumn();
+    }
+
 }
