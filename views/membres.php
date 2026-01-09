@@ -7,8 +7,15 @@ require_once '../classes/contrat.php';
 include 'header.php';
 $j = new Joueur("m", "m", "m", "m", "m", 111.00, 111.11);
 $contrat = new Contrat();
+//pagination
+$limit=10;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$page = max($page, 1);
+$offset = ($page - 1) * $limit;
+$totalMembres = $j->countMembres();
+$totalPages = ceil($totalMembres / $limit);
 if (!isset($_GET['search'])) {
-    $rows = $j->getJoueurs();
+    $rows = $j->getJoueurs($limit,$offset);
     $teams = new Team();
     $teams = $teams->allTeams();
 } else {
@@ -142,6 +149,49 @@ if (!isset($_GET['search'])) {
                         <?php endif; ?>
                     </tbody>
                 </table>
+                <!-- Pagination start -->
+                <?php if ($totalPages > 1): ?>
+                    <nav class="d-flex justify-content-between align-items-center mt-4">
+
+                        <!-- Infos -->
+                        <div class="text-muted small">
+                            Page <?= $page ?> sur <?= $totalPages ?>
+                        </div>
+
+                        <!-- Pagination -->
+                        <ul class="pagination pagination-sm mb-0">
+
+                            <!-- Précédent -->
+                            <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                <a class="page-link"
+                                    href="?page=<?= $page - 1 ?><?= isset($_GET['search']) ? '&search=' . urlencode($_GET['search']) : '' ?>">
+                                    Précédent
+                                </a>
+                            </li>
+
+                            <!-- Numéros -->
+                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                                    <a class="page-link"
+                                        href="?page=<?= $i ?><?= isset($_GET['search']) ? '&search=' . urlencode($_GET['search']) : '' ?>">
+                                        <?= $i ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
+
+                            <!-- Suivant -->
+                            <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                                <a class="page-link"
+                                    href="?page=<?= $page + 1 ?><?= isset($_GET['search']) ? '&search=' . urlencode($_GET['search']) : '' ?>">
+                                    Suivant
+                                </a>
+                            </li>
+
+                        </ul>
+                    </nav>
+                <?php endif; ?>
+
+                <!-- Pagination end -->
 
                 <!-- Modal start -->
                 <div class="modal fade" id="contratModal" tabindex="-1" aria-labelledby="contratModalLabel"

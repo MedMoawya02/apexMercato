@@ -9,7 +9,7 @@ class Joueur extends Personne
     private ?float $valeurMarchande = null;
     private ?float $salaireMensuel = null;
 
-    public function __construct(?string $nom=null,?string $email=null,?string $nationalite=null, ?string $role=null,?string $pseudo=null, ?float $valeurMarchande=null, ?float $salaireMensuel=null)
+    public function __construct(?string $nom = null, ?string $email = null, ?string $nationalite = null, ?string $role = null, ?string $pseudo = null, ?float $valeurMarchande = null, ?float $salaireMensuel = null)
     {
         parent::__construct($nom, $email, $nationalite);
         $this->role = $role;
@@ -39,7 +39,7 @@ class Joueur extends Personne
         ]);
     }
 
-    public function getJoueurs()
+    public function getJoueurs($limit,$offset)
     {
         $this->db = new Database("localhost", "apexmercato", "root", "");
         $conn = $this->db->getConnection();
@@ -56,18 +56,24 @@ class Joueur extends Personne
         FROM coach k
         LEFT JOIN contrat c
             ON c.idCoach = k.id
-            AND c.dateFin >= CURDATE()");
+            AND c.dateFin >= CURDATE()
+             LIMIT :limit OFFSET :offset
+            ")
+           ;
+        $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $rows;
     }
     //get joueurs avaient un contrat
-    public function joueursActifs(){
+    public function joueursActifs()
+    {
         $this->db = new Database("localhost", "apexmercato", "root", "");
         $conn = $this->db->getConnection();
-        $sql="SELECT count(*) FROM contrat 
+        $sql = "SELECT count(*) FROM contrat 
 INNER JOIN joueur ON contrat.idJoueur=joueur.id AND dateFin>CURRENT_DATE()";
-        $stmt=$conn->prepare($sql);
+        $stmt = $conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchColumn();
     }
@@ -85,7 +91,21 @@ INNER JOIN joueur ON contrat.idJoueur=joueur.id AND dateFin>CURRENT_DATE()";
             ':nom' => '%' . $nom . '%',
         ]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-
+    //get nbrMembres
+    public function countMembres()
+    {
+        $this->db = new Database("localhost", "apexmercato", "root", "");
+        $conn = $this->db->getConnection();
+        $sql = "SELECT COUNT(*) AS total
+FROM (
+    SELECT id FROM joueur
+    UNION ALL
+    SELECT id FROM coach
+) AS membres";
+        $stmt=$conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchColumn();
     }
 }

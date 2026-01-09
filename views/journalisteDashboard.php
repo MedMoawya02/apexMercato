@@ -9,9 +9,16 @@ if ($_SESSION['role'] !== 'journaliste') {
 }
 $contrat = new Contrat();
 $rows = $contrat->getData();
-
+//
+$limit = 6;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$page = max($page, 1);
+$offset = ($page - 1) * $limit;
 $transfert = new Transfert();
-$transferts = $transfert->allTransferts();
+$transferts = $transfert->allTransferts($limit, $offset);
+$totalTransferts = $transfert->countTransferts();
+$totalPages = ceil($totalTransferts / $limit);
+$nbrTransfert = $transfert->nbrTransfertFinis();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -94,6 +101,53 @@ $transferts = $transfert->allTransferts();
 
                         </table>
                     </div>
+
+                    <!-- pagination start -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+
+                        <!-- <div class="small text-muted">
+                                Affichage de <?= $start ?> à <?= $end ?> sur <?= $totalTransferts ?> transferts
+                            </div> -->
+
+                        <?php if ($totalPages > 1): ?>
+                            <div class="d-flex justify-content-between align-items-center mt-4">
+
+                                <!-- <div class="small text-muted">
+                                    Affichage de <?= ($offset + 1) ?>
+                                    à <?= min($offset + $limit, $totalTransferts) ?>
+                                    sur <?= $totalTransferts ?> transferts
+                                </div> -->
+
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0">
+
+                                        <!-- Précédent -->
+                                        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                            <a class="page-link" href="?page=<?= $page - 1 ?>">Précédent</a>
+                                        </li>
+
+                                        <!-- Pages -->
+                                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                            <li class="page-item <?= ($i === $page) ? 'active' : '' ?>">
+                                                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                            </li>
+                                        <?php endfor; ?>
+
+                                        <!-- Suivant -->
+                                        <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                                            <a class="page-link" href="?page=<?= $page + 1 ?>">Suivant</a>
+                                        </li>
+
+                                    </ul>
+                                </nav>
+
+                            </div>
+                        <?php endif; ?>
+
+
+                    </div>
+                    <!-- pagination end -->
+
                 </div>
             </div>
         </div>
@@ -134,7 +188,7 @@ $transferts = $transfert->allTransferts();
                     </div>
                 </div>
             </div>
-        </div>       
+        </div>
     </div>
 </body>
 

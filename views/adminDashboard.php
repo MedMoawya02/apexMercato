@@ -8,13 +8,21 @@ if ($_SESSION['role'] !== 'admin') {
     header('Location:views/login.php');
     exit;
 }
+//
 $transfert = new Transfert();
-$transferts = $transfert->allTransferts();
-$nbrTransfert=$transfert->nbrTransfertFinis();
-$joueur=new Joueur();
-$joueursActifs=$joueur->joueursActifs();
-$team=new Team();
-$nbrEquipes=$team->nbrEquipes();
+$limit = 6;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$page = max($page, 1);
+$offset = ($page - 1) * $limit;
+$transferts = $transfert->allTransfertsPaginated($limit, $offset);
+$totalTransferts = $transfert->countTransferts();
+$totalPages = ceil($totalTransferts / $limit);
+$nbrTransfert = $transfert->nbrTransfertFinis();
+//
+$joueur = new Joueur();
+$joueursActifs = $joueur->joueursActifs();
+$team = new Team();
+$nbrEquipes = $team->nbrEquipes();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -80,7 +88,7 @@ $nbrEquipes=$team->nbrEquipes();
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="stat-label">Joueurs Actifs</div>
-                                <div class="display-6 fw-bold"><?=$joueursActifs ?? 0?></div>
+                                <div class="display-6 fw-bold"><?= $joueursActifs ?? 0 ?></div>
                             </div>
                             <div class="icon-shape">
                                 <i class="bi bi-person-badge"></i>
@@ -128,7 +136,7 @@ $nbrEquipes=$team->nbrEquipes();
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="stat-label">Transferts Finis</div>
-                                <div class="display-6 fw-bold"><?=$nbrTransfert ?? 0 ?></div>
+                                <div class="display-6 fw-bold"><?= $nbrTransfert ?? 0 ?></div>
                             </div>
                             <div class="icon-shape">
                                 <i class="bi bi-arrow-left-right"></i>
@@ -173,7 +181,7 @@ $nbrEquipes=$team->nbrEquipes();
                                                 $parts = explode(' ', $nomMembre);
                                                 foreach ($parts as $p) {
                                                     $initials .= strtoupper(substr($p, 0, 2));
-                                                } 
+                                                }
                                             }
 
                                             // badge statut
@@ -214,7 +222,9 @@ $nbrEquipes=$team->nbrEquipes();
                                                 <td><?= htmlspecialchars($t['equipeArrive']) ?></td>
 
                                                 <!-- Montant -->
-                                                <td class="fw-bold">€<?= /* number_format($t['montant'], 0, ',', ' ') */Formater::currency($t['montant']) ?></td>
+                                                <td class="fw-bold">
+                                                    €<?= /* number_format($t['montant'], 0, ',', ' ') */ Formater::currency($t['montant']) ?>
+                                                </td>
 
                                                 <!-- Statut -->
                                                 <td>
@@ -236,6 +246,39 @@ $nbrEquipes=$team->nbrEquipes();
 
                             </table>
                         </div>
+
+                        <!-- pagination start -->
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+
+                            <!-- <div class="small text-muted">
+                                Affichage de <?= $start ?> à <?= $end ?> sur <?= $totalTransferts ?> transferts
+                            </div> -->
+
+                            <?php if ($totalPages > 1): ?>
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination pagination-sm mb-0">
+
+                                        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                                            <a class="page-link" href="?page=<?= $page - 1 ?>">Précédent</a>
+                                        </li>
+
+                                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                            <li class="page-item <?= $i === $page ? 'active' : '' ?>">
+                                                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                            </li>
+                                        <?php endfor; ?>
+
+                                        <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                                            <a class="page-link" href="?page=<?= $page + 1 ?>">Suivant</a>
+                                        </li>
+
+                                    </ul>
+                                </nav>
+                            <?php endif; ?>
+
+                        </div>
+                        <!-- pagination end -->
+
                     </div>
                 </div>
             </div>
